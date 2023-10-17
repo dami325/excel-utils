@@ -16,11 +16,6 @@ public class LightBlueStyle implements CellStyleStrategy {
         headerStyle.setAlignment(HorizontalAlignment.CENTER);
         headerStyle.setVerticalAlignment(VerticalAlignment.CENTER);
 
-        Font font = target.createFont();
-        font.setFontName("맑은 고딕");
-        font.setFontHeight((short) (9 * 20));
-        headerStyle.setFont(font);
-
         return headerStyle;
     }
 

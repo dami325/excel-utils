@@ -6,7 +6,6 @@ public class DefaultBodyStyle implements CellStyleStrategy {
     @Override
     public CellStyle getCellStyle(Workbook target) {
         CellStyle bodyStyle = target.createCellStyle();
-
         bodyStyle.setAlignment(HorizontalAlignment.CENTER);
         bodyStyle.setVerticalAlignment(VerticalAlignment.CENTER);
         bodyStyle.setBorderRight(BorderStyle.THIN);
