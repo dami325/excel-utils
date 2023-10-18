@@ -1,8 +1,8 @@
-package excel.annotation;
+package net.youyoung.excel.annotation;
 
-import excel.style.CellStyleStrategy;
-import excel.style.DefaultBodyStyle;
-import excel.style.DefaultHeaderStyle;
+import net.youyoung.excel.style.CellStyleStrategy;
+import net.youyoung.excel.style.DefaultBodyStyle;
+import net.youyoung.excel.style.DefaultHeaderStyle;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
@@ -36,10 +36,17 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 @Retention(RUNTIME)
 public @interface ExcelColumn {
     String header() default "";
+
     String headerEn() default "";
+
     int width() default 4096;
+
     Class<? extends CellStyleStrategy> headerStyle() default DefaultHeaderStyle.class;
+
     Class<? extends CellStyleStrategy> bodyStyle() default DefaultBodyStyle.class;
+
     String format() default "";
+
     String columnDefault() default "";
+
 }

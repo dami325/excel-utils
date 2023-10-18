@@ -1,15 +1,15 @@
-package excel.annotation;
+package net.youyoung.excel.annotation;
 
 
-import excel.style.CellStyleStrategy;
+import org.apache.poi.ss.usermodel.CellStyle;
 
 public record ExcelFieldInfo
         (
                 String header,
                 String headerEn,
                 int width,
-                Class<? extends CellStyleStrategy> headerStyleStrategy,
-                Class<? extends CellStyleStrategy> bodyStyleStrategy,
+                CellStyle headerStyleStrategy,
+                CellStyle bodyStyleStrategy,
                 String format,
                 String columnDefault
         ) {}
