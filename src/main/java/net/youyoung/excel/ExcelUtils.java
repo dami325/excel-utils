@@ -2,7 +2,7 @@ package net.youyoung.excel;
 
 import net.youyoung.excel.annotation.ExcelColumn;
 import net.youyoung.excel.annotation.ExcelFieldInfo;
-import net.youyoung.excel.style.CellStyleStrategy;
+import net.youyoung.excel.annotation.ExcelTitle;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.DataFormat;
@@ -35,32 +35,52 @@ public class ExcelUtils<T> {
      * 다국어 처리
      * 엑셀 다운로드 메서드
      *
-     * @param list                 다운받을 DTO 목록
-     * @param clazz                DTO 클래스 정보
-     * @param responseOutputStream contentType 과 header 정보가 입력된 response.getOutputStream() 필요
      * @param <T>                  DTO
-     *                             <p>
      *                             사용코드 예시
      *                             response.setContentType(ExcelUtils.EXCEL_MIME_TYPE); // EXCEL_MIME_TYPE = application/vnd.openxmlformats-officedocument.spreadsheetml.sheet
      *                             response.setHeader("Content-Disposition", String.format("attachment;filename=%s_%s.xlsx", "CHAIN_LIST", LocalDate.now()));
-     *                             <p>
      *                             ExcelUtils.download(list, clazz, response.getOutputStream(), LocaleContextHolder.getLocale());
+     * @param list                 다운받을 DTO 목록
+     * @param clazz                DTO 클래스 정보
+     * @param responseOutputStream contentType 과 header 정보가 입력된 response.getOutputStream() 필요
      */
-    public static <T> void download(List<T> list, Class<T> clazz, OutputStream responseOutputStream, Locale locale) {
-
-        if (locale == null) {
-            locale = Locale.KOREAN;
-        }
+    public static <T> void download(List<T> list, Class<T> clazz, OutputStream responseOutputStream, String sheetTitle, Locale locale) {
 
         if (list == null || clazz == null || responseOutputStream == null)
             throw new IllegalArgumentException("list or clazz cannot be null");
+
+        if (locale == null) locale = Locale.KOREAN;
 
         try (SXSSFWorkbook workbook = new SXSSFWorkbook()) {
             SXSSFSheet sheet = workbook.createSheet();
             DataFormat dataFormat = workbook.createDataFormat();
             int rowNo = 0, cellNo = 0;
-            Map<String, ExcelFieldInfo> fieldInfoMap = enumColumnMetaData(clazz, workbook);
+            Map<String, ExcelFieldInfo> fieldInfoMap = excelColumnMetaData(clazz, workbook);
             Set<String> fieldNames = fieldInfoMap.keySet();
+            int contentSize = list.size();
+
+            workbook.setSheetName(0, sheetTitle);
+
+            // @ExcelTitle
+            if (clazz.isAnnotationPresent(ExcelTitle.class)) {
+
+                ExcelTitle excelTitle = clazz.getAnnotation(ExcelTitle.class);
+
+                if (excelTitle.useSheetTitle()) {
+                    Row titleRow = sheet.createRow(rowNo++);
+                    //cell 생성 및 설정
+                    Cell titleCell = titleRow.createCell(cellNo);
+
+                    titleCell.setCellValue(sheetTitle);
+                    titleCell.setCellStyle(excelTitle.titleStyle().getDeclaredConstructor().newInstance().getCellStyle(workbook));
+                }
+
+                if (excelTitle.useTotal()) {
+                    Row totlaRow = sheet.createRow(rowNo++);
+                    Cell totalCell = totlaRow.createCell(cellNo);
+                    totalCell.setCellValue(isLocaleKorean(locale) ? "전체 : " + contentSize : "Total : " + contentSize);
+                }
+            }
 
             //header
             Row headerRow = sheet.createRow(rowNo++);
@@ -72,15 +92,10 @@ public class ExcelUtils<T> {
 
                 cell.setCellStyle(fieldInfo.headerStyleStrategy());
 
-                if (locale.equals(Locale.KOREAN)) {
-                    setCellValue(cell, fieldInfo.header(), fieldInfo.columnDefault());
-                }
-                else {
-                    setCellValue(cell, fieldInfo.headerEn(), fieldInfo.columnDefault());
-                }
+                setCellValue(cell, isLocaleKorean(locale) ? fieldInfo.header() : fieldInfo.headerEn(), fieldInfo.columnDefault());
             }
 
-            if (list.isEmpty()) return;
+            if (contentSize == 0) return;
 
 
             //body
@@ -124,7 +139,11 @@ public class ExcelUtils<T> {
         }
     }
 
-    private static <T> Map<String, ExcelFieldInfo> enumColumnMetaData(Class<T> clazz, SXSSFWorkbook workbook) throws InstantiationException, IllegalAccessException, InvocationTargetException, NoSuchMethodException {
+    private static boolean isLocaleKorean(Locale locale) {
+        return locale.equals(Locale.KOREAN);
+    }
+
+    private static <T> Map<String, ExcelFieldInfo> excelColumnMetaData(Class<T> clazz, SXSSFWorkbook workbook) throws InstantiationException, IllegalAccessException, InvocationTargetException, NoSuchMethodException {
         Map<String, ExcelFieldInfo> fieldInfoMap = new LinkedHashMap<>();
 
         for (Field field : clazz.getDeclaredFields()) {
@@ -139,8 +158,8 @@ public class ExcelUtils<T> {
                                         excelColumn.header().equals("") ? excelColumn.headerEn() : excelColumn.header(),
                                         excelColumn.headerEn().equals("") ? excelColumn.header() : excelColumn.headerEn(),
                                         excelColumn.width(),
-                                        excelColumn.headerStyle().getDeclaredConstructor().newInstance().getCellStyle(workbook.createCellStyle()),
-                                        excelColumn.bodyStyle().getDeclaredConstructor().newInstance().getCellStyle(workbook.createCellStyle()),
+                                        excelColumn.headerStyle().getDeclaredConstructor().newInstance().getCellStyle(workbook),
+                                        excelColumn.bodyStyle().getDeclaredConstructor().newInstance().getCellStyle(workbook),
                                         excelColumn.format(),
                                         excelColumn.columnDefault()
                                 )
