@@ -14,7 +14,6 @@ public class DefaultBodyStyle implements CellStyleStrategy {
         cellStyle.setBorderLeft(BorderStyle.THIN);
         cellStyle.setBorderTop(BorderStyle.THIN);
         cellStyle.setBorderBottom(BorderStyle.THIN);
-        cellStyle.setWrapText(true); // 자동줄바꿈 기능
 
         return cellStyle;
     }
