@@ -174,29 +174,25 @@ public class ExcelUtils<T> {
      * 값 타입 체크
      */
     private static void setCellValue(Cell cell, Object cellValue, String defaultValue) {
-        if (cellValue instanceof Number) {
-            Number numberValue = (Number) cellValue;
-            cell.setCellValue(numberValue.doubleValue());
-            return;
-        } else if (cellValue instanceof LocalDateTime) {
-            LocalDateTime localDateTime = (LocalDateTime) cellValue;
+        if (cellValue instanceof Number number) {
+            cell.setCellValue(number.doubleValue());
+        }
+        else if (cellValue instanceof LocalDateTime localDateTime) {
             cell.setCellValue(localDateTime);
-            return;
-        } else if (cellValue instanceof LocalDate) {
-            LocalDate localDate = (LocalDate) cellValue;
+        }
+        else if (cellValue instanceof LocalDate localDate) {
             cell.setCellValue(localDate);
-            return;
-        } else if (cellValue instanceof Date) {
-            Date dateValue = (Date) cellValue;
-            cell.setCellValue(dateValue);
-            return;
-        } else if (cellValue instanceof Boolean) {
-            Boolean booleanValue = (Boolean) cellValue;
-            cell.setCellValue(booleanValue);
-            return;
+        }
+        else if (cellValue instanceof Date date) {
+            cell.setCellValue(date);
+        }
+        else if (cellValue instanceof Boolean aBoolean) {
+            cell.setCellValue(aBoolean);
+        }
+        else {
+            cell.setCellValue(cellValue == null ? defaultValue : cellValue.toString());
         }
 
-        cell.setCellValue(cellValue == null ? defaultValue : cellValue.toString());
     }
 
 }
