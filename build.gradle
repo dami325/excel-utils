@@ -14,7 +14,8 @@ dependencies {
 
 }
 
-java {
-    withSourcesJar()
-
+jar {
+    from sourceSets.main.output // 컴파일된 클래스를 JAR에 추가
+    from sourceSets.main.java // 소스 코드를 JAR에 추가
 }
+
