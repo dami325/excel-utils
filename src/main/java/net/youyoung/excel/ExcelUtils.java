@@ -95,7 +95,10 @@ public class ExcelUtils<T> {
                 setCellValue(cell, isLocaleKorean(locale) ? fieldInfo.header() : fieldInfo.headerEn(), fieldInfo.columnDefault());
             }
 
-            if (contentSize == 0) return;
+            if (contentSize == 0) {
+                workbook.write(responseOutputStream);
+                return;
+            }
 
 
             //body
