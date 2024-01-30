@@ -18,4 +18,8 @@ public @interface ExcelTitle {
     Class<? extends CellStyleStrategy> titleStyle() default DefaultTitleStyle.class;
 
     boolean useSheetTitle() default true;
+
+    String sheetTitle() default "";
+
+    String sheetTitleEn() default "";
 }

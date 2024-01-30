@@ -1,0 +1,146 @@
+// Maven Publish 플러그인 적용
+apply plugin: 'maven-publish'
+// Signing 플러그인 적용
+apply plugin: 'signing'
+// publish.gradle 파일 적용
+apply from: 'publish.gradle'
+
+// sourcesJar 및 javadocJar 태스크 정의
+task sourcesJar(type: Jar) {
+    archiveClassifier.set("sources")
+}
+
+task javadocJar(type: Jar) {
+    archiveClassifier.set("javadoc")
+}
+
+// artifacts 블록에서 생성된 JAR 파일을 정의
+artifacts {
+    archives sourcesJar
+    archives javadocJar
+}
+
+// Maven 그룹 및 버전 설정
+group = PUBLISH_GROUP_ID
+version = PUBLISH_VERSION
+
+// 확장 속성 초기화
+ext["signing.keyId"] = ''
+ext["signing.password"] = ''
+ext["signing.secretKeyRingFile"] = ''
+ext["ossrhUsername"] = ''
+ext["ossrhPassword"] = ''
+ext["sonatypeStagingProfileId"] = ''
+
+// local.properties 파일 존재 여부 확인 및 환경 변수 불러오기
+File secretPropsFile = project.rootProject.file('local.properties')
+if (secretPropsFile.exists()) {
+    Properties p = new Properties()
+    p.load(new FileInputStream(secretPropsFile))
+    p.each { name, value ->
+        ext[name] = value
+    }
+} else {
+    // local.properties 파일이 존재하지 않으면 시스템 환경 변수에서 값을 가져오는 코드
+    ext["signing.keyId"] = System.getenv('SIGNING_KEY_ID')
+    ext["signing.password"] = System.getenv('SIGNING_PASSWORD')
+    ext["signing.secretKeyRingFile"] = System.getenv('SIGNING_SECRET_KEY_RING_FILE')
+    ext["ossrhUsername"] = System.getenv('OSSRH_USERNAME')
+    ext["ossrhPassword"] = System.getenv('OSSRH_PASSWORD')
+    ext["sonatypeStagingProfileId"] = System.getenv('SONATYPE_STAGING_PROFILE_ID')
+}
+
+// Maven Publishing 블록 설정
+publishing {
+    publications {
+        release(MavenPublication) {
+            groupId PUBLISH_GROUP_ID
+            artifactId PUBLISH_ARTIFACT_ID
+            version PUBLISH_VERSION
+
+            // JAR 파일 및 sourcesJar, javadocJar 파일 지정
+            artifact("$buildDir/libs/${project.getName()}-${version}.jar")
+            artifact sourcesJar
+            artifact javadocJar
+
+            // POM 설정
+            pom {
+                name = PUBLISH_ARTIFACT_ID
+                description = PUBLISH_DESCRIPTION
+                url = PUBLISH_URL
+
+                // 라이선스 정보
+                licenses {
+                    license {
+                        name = PUBLISH_LICENSE_NAME
+                        url = PUBLISH_LICENSE_URL
+                    }
+                }
+
+                // 개발자 정보
+                developers {
+                    developer {
+                        id = PUBLISH_DEVELOPER_ID
+                        name = PUBLISH_DEVELOPER_NAME
+                        email = PUBLISH_DEVELOPER_EMAIL
+                    }
+                    // 다른 개발자 정보...
+                }
+
+                // SCM 설정
+                scm {
+                    connection = PUBLISH_SCM_CONNECTION
+                    developerConnection = PUBLISH_SCM_DEVELOPER_CONNECTION
+                    url = PUBLISH_SCM_URL
+                }
+
+                // dependencies 블록 생성
+                withXml {
+                    def dependenciesNode = asNode().appendNode('dependencies')
+
+                    // 프로젝트의 모든 종속성을 POM에 추가
+                    project.configurations.implementation.allDependencies.each {
+                        def dependencyNode = dependenciesNode.appendNode('dependency')
+                        dependencyNode.appendNode('groupId', it.group)
+                        dependencyNode.appendNode('artifactId', it.name)
+                        dependencyNode.appendNode('version', it.version)
+                    }
+                }
+            }
+        }
+    }
+
+    // Maven Repository 설정
+    repositories {
+        maven {
+            name = "sonatype"
+            url = "https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/"
+
+            // Credentials 설정
+            credentials {
+                username ossrhUsername
+                password ossrhPassword
+            }
+        }
+    }
+}
+
+// Nexus Publishing 블록 설정
+nexusPublishing {
+    repositories {
+        sonatype {
+            nexusUrl.set(uri("https://s01.oss.sonatype.org/service/local/"))
+            snapshotRepositoryUrl.set(uri("https://s01.oss.sonatype.org/content/repositories/snapshots/"))
+            packageGroup = PUBLISH_GROUP_ID
+            stagingProfileId = sonatypeStagingProfileId
+            username = ossrhUsername
+            password = ossrhPassword
+        }
+    }
+}
+
+// Signing 설정
+signing {
+    // publishing 블록의 publications에 서명 적용
+    sign publishing.publications
+}

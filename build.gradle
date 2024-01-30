@@ -1,4 +1,11 @@
+buildscript {
+    dependencies {
+        classpath "io.github.gradle-nexus:publish-plugin:1.1.0"
+    }
+}
+
 plugins {
+    id 'io.spring.dependency-management' version '1.0.11.RELEASE'
     id 'java'
 }
 
@@ -10,12 +17,10 @@ repositories {
 }
 
 dependencies {
+    implementation 'org.springframework.boot:spring-boot-starter-web:2.7.0'
     implementation 'org.apache.poi:poi-ooxml:5.2.3'
-
 }
 
-jar {
-//    from sourceSets.main.output // 컴파일된 클래스를 JAR에 추가
-//    from sourceSets.main.java // 소스 코드를 JAR에 추가
-}
-
+apply plugin: 'io.github.gradle-nexus.publish-plugin'
+apply from: "${rootDir}/scripts/publish-maven.gradle"
+apply from: 'publish.gradle'

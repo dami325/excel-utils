@@ -1,0 +1,16 @@
+ext {
+    PUBLISH_GROUP_ID = 'io.github.dami325'
+    PUBLISH_VERSION = '0.0.2'
+    PUBLISH_ARTIFACT_ID = 'excel-utils'
+    PUBLISH_DESCRIPTION = 'SpringBoot Excel Download Library'
+    PUBLISH_URL = 'https://github.com/dami325/excel-utils'
+    PUBLISH_LICENSE_NAME = 'Apache License'
+    PUBLISH_LICENSE_URL = 'https://github.com/dami325/excel-utils/blob/master/LICENSE'
+    PUBLISH_DEVELOPER_ID = 'dami325'
+    PUBLISH_DEVELOPER_NAME = 'Judalm Park'
+    PUBLISH_DEVELOPER_EMAIL = 'wnekfa1004@naver.com'
+    PUBLISH_SCM_CONNECTION = 'scm:git:github.com/dami325/excel-utils.git'
+    PUBLISH_SCM_DEVELOPER_CONNECTION = 'scm:git:ssh://github.com:dami325/excel-utils.git'
+    PUBLISH_SCM_URL = 'https://github.com/dami325/excel-utils/tree/master'
+}
+// Maven Publishing 블록 설정에 필요한 변수 지정
