@@ -65,6 +65,11 @@ publishing {
 
             // POM 설정
             pom {
+                /**
+                 name = '[라이브러리 이름]'
+                 description = '[라이브러리 설명]'
+                 url = '[오픈소스 Repository Url]'
+                 */
                 name = PUBLISH_ARTIFACT_ID
                 description = PUBLISH_DESCRIPTION
                 url = PUBLISH_URL
@@ -87,7 +92,11 @@ publishing {
                     // 다른 개발자 정보...
                 }
 
-                // SCM 설정
+                /**
+                 connection = 'scm:git:github.com/[Github 사용자명]/[오픈소스 Repository 이름].git'
+                 developerConnection = 'scm:git:ssh://github.com/[Github 사용자명]/[오픈소스 Repository 이름].git'
+                 url = 'https://github.com/[Github 사용자명]/[오픈소스 Repository 이름]/tree/[배포 브랜치명]'
+                 */
                 scm {
                     connection = PUBLISH_SCM_CONNECTION
                     developerConnection = PUBLISH_SCM_DEVELOPER_CONNECTION
@@ -139,7 +148,7 @@ nexusPublishing {
     }
 }
 
-// Signing 설정
+// Signing 설정 gradle에서 release 빌드를 할때는 sign을 하게끔 설정해준다.
 signing {
     // publishing 블록의 publications에 서명 적용
     sign publishing.publications
