@@ -1,5 +1,7 @@
 package net.youyoung.excel;
 
+import jakarta.servlet.ServletOutputStream;
+import jakarta.servlet.http.HttpServletResponse;
 import net.youyoung.excel.annotation.ExcelColumn;
 import net.youyoung.excel.annotation.ExcelFieldInfo;
 import net.youyoung.excel.annotation.ExcelTitle;
@@ -16,8 +18,6 @@ import org.springframework.lang.NonNull;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
-import javax.servlet.ServletOutputStream;
-import javax.servlet.http.HttpServletResponse;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
@@ -108,7 +108,7 @@ public class ExcelUtils<T> {
 
     /**
      * @return 엑셀 리소스만 필요할때
-     * 후처리는 사용자가 해야함
+     * 후처리는 사용자에게 위임
      * 사용코드
      *
      * resource = ExcelUtils.getResource(excelList, clazz);
