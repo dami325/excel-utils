@@ -29,6 +29,9 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.*;
 
+/**
+ * @author Judalm park
+ */
 public class ExcelUtils<T> {
 
     public static final String EXCEL_MIME_TYPE = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
@@ -37,7 +40,8 @@ public class ExcelUtils<T> {
 
     /**
      * 다국어 처리
-     * 엑셀 다운로드 메서드
+     * 엑셀 다운로드 메서드.
+     *
      * @param list 다운받을 DTO 리스트
      * @param clazz 리스트 DTO 클래스 정보
      * @param downloadFileName 다운받을 파일명
@@ -164,6 +168,69 @@ public class ExcelUtils<T> {
             if (contentSize == 0)
                 return getWorkbookResource(workbook, byteArrayOutputStream);
 
+
+            //body
+            setBodyCellValue(list, sheet, dataFormat, rowNo, fieldInfoMap, fieldNames);
+
+            return getWorkbookResource(workbook, byteArrayOutputStream);
+
+        } catch (IllegalAccessException | IOException | NoSuchFieldException | NoSuchMethodException |
+                 InstantiationException | InvocationTargetException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    /**
+     * 시트 첫번째 셀 제목 커스텀 추가
+     */
+    public static <T> Resource getResource(@NonNull List<T> list, @NonNull Class<T> clazz, String titleAppend) {
+
+        parameterValidation(list, clazz);
+
+        Locale locale = LocaleContextHolder.getLocale();
+
+        try (SXSSFWorkbook workbook = new SXSSFWorkbook();
+             ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();) {
+            SXSSFSheet sheet = workbook.createSheet();
+            DataFormat dataFormat = workbook.createDataFormat();
+            int rowNo = 0, cellNo = 0;
+            Map<String, ExcelFieldInfo> fieldInfoMap = excelColumnMetaData(clazz, workbook);
+            Set<String> fieldNames = fieldInfoMap.keySet();
+            int contentSize = list.size();
+
+            String sheetTitle = "";
+            // @ExcelTitle
+            if (clazz.isAnnotationPresent(ExcelTitle.class)) {
+
+                ExcelTitle excelTitle = clazz.getAnnotation(ExcelTitle.class);
+
+                if (excelTitle.useSheetTitle()) {
+                    Row titleRow = sheet.createRow(rowNo++);
+                    //cell 생성 및 설정
+                    Cell titleCell = titleRow.createCell(cellNo);
+
+                    sheetTitle = isLocaleKorean(locale) ? excelTitle.sheetTitle() : excelTitle.sheetTitleEn();
+
+                    sheetTitle.concat(titleAppend);
+
+                    titleCell.setCellValue(sheetTitle);
+                    titleCell.setCellStyle(excelTitle.titleStyle().getDeclaredConstructor().newInstance().getCellStyle(workbook));
+                }
+
+                if (excelTitle.useTotal()) {
+                    Row totlaRow = sheet.createRow(rowNo++);
+                    Cell totalCell = totlaRow.createCell(cellNo);
+                    totalCell.setCellValue(isLocaleKorean(locale) ? "전체 : " + contentSize : "Total : " + contentSize);
+                }
+            }
+
+            setSheetTitle(workbook, sheetTitle);
+
+            //header
+            rowNo = setHeaderCellValue(locale, sheet, rowNo, cellNo, fieldInfoMap, fieldNames);
+
+            if (contentSize == 0)
+                return getWorkbookResource(workbook, byteArrayOutputStream);
 
             //body
             setBodyCellValue(list, sheet, dataFormat, rowNo, fieldInfoMap, fieldNames);
