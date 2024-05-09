@@ -119,7 +119,7 @@ public class ExcelUtils<T> {
      * HttpHeaders headers = new HttpHeaders();
      * headers.add(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + orgFileName + "\"");
      * headers.setContentType(MediaType.parseMediaType(mimeType));
-     * new ResponseEntity<>(resource, httpHeaders, HttpStatus.OK);
+     * new ResponseEntity<T>(resource, httpHeaders, HttpStatus.OK);
      */
     public static <T> Resource getResource(@NonNull List<T> list, @NonNull Class<T> clazz) {
 
@@ -211,7 +211,7 @@ public class ExcelUtils<T> {
 
                     sheetTitle = isLocaleKorean(locale) ? excelTitle.sheetTitle() : excelTitle.sheetTitleEn();
 
-                    sheetTitle.concat(titleAppend);
+                    sheetTitle = sheetTitle.concat(titleAppend);
 
                     titleCell.setCellValue(sheetTitle);
                     titleCell.setCellStyle(excelTitle.titleStyle().getDeclaredConstructor().newInstance().getCellStyle(workbook));
